@@ -15,6 +15,11 @@ spec:
     spec:
       nodeSelector:
         kubernetes.io/os: windows
+      tolerations:  # TKGI-CHANGE
+      - key: "windows"  # TKGI-CHANGE
+        operator: "Equal"  # TKGI-CHANGE
+        value: "2019"  # TKGI-CHANGE
+        effect: "NoSchedule"  # TKGI-CHANGE
       priorityClassName: system-node-critical
       containers:
         - name: liveness-probe
@@ -42,7 +47,7 @@ spec:
           args:
             - --v=5
             - --csi-address=$(CSI_ENDPOINT)
-            - --kubelet-registration-path=C:\\var\\lib\\kubelet\\plugins\\smb.csi.k8s.io\\csi.sock
+            - --kubelet-registration-path=C:\\var\\vcap\\data\\kubelet-windows\\plugins\\smb.csi.k8s.io\\csi.sock  # TKGI-CHANGE
           env:
             - name: CSI_ENDPOINT
               value: unix://C:\\csi\\csi.sock
@@ -52,7 +57,7 @@ spec:
                   fieldPath: spec.nodeName
           volumeMounts:
             - name: kubelet-dir
-              mountPath: "C:\\var\\lib\\kubelet"
+              mountPath: "C:\\var\\vcap\\data\\kubelet-windows"  # TKGI-CHANGE
             - name: plugin-dir
               mountPath: C:\csi
             - name: registration-dir
@@ -96,10 +101,10 @@ spec:
                   apiVersion: v1
                   fieldPath: spec.nodeName
           securityContext:
-            privileged: true
+          #  privileged: true  # TKGI-CHANGE
           volumeMounts:
             - name: kubelet-dir
-              mountPath: "C:\\var\\lib\\kubelet"
+              mountPath: "C:\\var\\vcap\\data\\kubelet-windows"  # TKGI-CHANGE
             - name: plugin-dir
               mountPath: C:\csi
             - name: csi-proxy-fs-pipe
@@ -124,13 +129,13 @@ spec:
             type: ""
         - name: registration-dir
           hostPath:
-            path: C:\var\lib\kubelet\plugins_registry\
-            type: Directory
+            path: C:\var\vcap\data\kubelet-windows\plugins_registry\  # TKGI-CHANGE
+            type: DirectoryOrCreate
         - name: kubelet-dir
           hostPath:
-            path: C:\var\lib\kubelet\
+            path: C:\var\vcap\data\kubelet-windows\  # TKGI-CHANGE
             type: Directory
         - name: plugin-dir
           hostPath:
-            path: C:\var\lib\kubelet\plugins\smb.csi.k8s.io\
+            path: C:\var\vcap\data\kubelet-windows\plugins\smb.csi.k8s.io\  # TKGI-CHANGE
             type: DirectoryOrCreate
