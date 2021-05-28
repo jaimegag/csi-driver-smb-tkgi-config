@@ -47,7 +47,7 @@ spec:
           args:
             - --v=5
             - --csi-address=$(CSI_ENDPOINT)
-            - --kubelet-registration-path=C:\\var\\vcap\\data\\kubelet-windows\\plugins\\smb.csi.k8s.io\\csi.sock  # TKGI-CHANGE
+            - --kubelet-registration-path=C:\\var\\lib\\kubelet\\plugins\\smb.csi.k8s.io\\csi.sock
           env:
             - name: CSI_ENDPOINT
               value: unix://C:\\csi\\csi.sock
@@ -57,7 +57,7 @@ spec:
                   fieldPath: spec.nodeName
           volumeMounts:
             - name: kubelet-dir
-              mountPath: "C:\\var\\vcap\\data\\kubelet-windows"  # TKGI-CHANGE
+              mountPath: "C:\\var\\lib\\kubelet"
             - name: plugin-dir
               mountPath: C:\csi
             - name: registration-dir
@@ -104,7 +104,7 @@ spec:
           #  privileged: true  # TKGI-CHANGE
           volumeMounts:
             - name: kubelet-dir
-              mountPath: "C:\\var\\vcap\\data\\kubelet-windows"  # TKGI-CHANGE
+              mountPath: "C:\\var\\lib\\kubelet"
             - name: plugin-dir
               mountPath: C:\csi
             - name: csi-proxy-fs-pipe
@@ -129,13 +129,13 @@ spec:
             type: ""
         - name: registration-dir
           hostPath:
-            path: C:\var\vcap\data\kubelet-windows\plugins_registry\  # TKGI-CHANGE
-            type: DirectoryOrCreate
+            path: C:\var\lib\kubelet\plugins_registry\
+            type: Directory
         - name: kubelet-dir
           hostPath:
-            path: C:\var\vcap\data\kubelet-windows\  # TKGI-CHANGE
+            path: C:\var\lib\kubelet\
             type: Directory
         - name: plugin-dir
           hostPath:
-            path: C:\var\vcap\data\kubelet-windows\plugins\smb.csi.k8s.io\  # TKGI-CHANGE
+            path: C:\var\lib\kubelet\plugins\smb.csi.k8s.io\
             type: DirectoryOrCreate
