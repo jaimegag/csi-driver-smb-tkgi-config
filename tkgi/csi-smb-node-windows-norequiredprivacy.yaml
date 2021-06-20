@@ -73,8 +73,7 @@ spec:
               cpu: 10m
               memory: 20Mi
         - name: smb
-          image: mcr.microsoft.com/k8s/csi/smb-csi:v1.0.0
-          image: jaimegag/smb-csi:latest-windows-1809-amd64
+          image: jaimegag/smb-csi:latest-windows-1809-amd64  # TKGI-CHANGE
           imagePullPolicy: IfNotPresent
           args:
             - --v=5
