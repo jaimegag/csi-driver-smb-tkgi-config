@@ -13,25 +13,28 @@ spec:
       labels:
         app: csi-smb-node-win
     spec:
+      tolerations:
+        - key: "windows"  # TKGI-CHANGE
+          operator: "Equal"  # TKGI-CHANGE
+          value: "2019"  # TKGI-CHANGE
+          effect: "NoSchedule"  # TKGI-CHANGE
+        - key: "node.kubernetes.io/os"
+          operator: "Exists"
+          effect: "NoSchedule"
       nodeSelector:
         kubernetes.io/os: windows
-      tolerations:  # TKGI-CHANGE
-      - key: "windows"  # TKGI-CHANGE
-        operator: "Equal"  # TKGI-CHANGE
-        value: "2019"  # TKGI-CHANGE
-        effect: "NoSchedule"  # TKGI-CHANGE
       priorityClassName: system-node-critical
       containers:
         - name: liveness-probe
           volumeMounts:
             - mountPath: C:\csi
               name: plugin-dir
-          image: mcr.microsoft.com/oss/kubernetes-csi/livenessprobe:v2.0.1-alpha.1-windows-1809-amd64
+          image: mcr.microsoft.com/oss/kubernetes-csi/livenessprobe:v2.3.0
           args:
             - --csi-address=$(CSI_ENDPOINT)
             - --probe-timeout=3s
             - --health-port=29643
-            - --v=5
+            - --v=2
           env:
             - name: CSI_ENDPOINT
               value: unix://C:\\csi\\csi.sock
@@ -43,9 +46,9 @@ spec:
               cpu: 10m
               memory: 20Mi
         - name: node-driver-registrar
-          image: mcr.microsoft.com/oss/kubernetes-csi/csi-node-driver-registrar:v2.0.1
+          image: mcr.microsoft.com/oss/kubernetes-csi/csi-node-driver-registrar:v2.2.0
           args:
-            - --v=5
+            - --v=2
             - --csi-address=$(CSI_ENDPOINT)
             - --kubelet-registration-path=C:\\var\\lib\\kubelet\\plugins\\smb.csi.k8s.io\\csi.sock
           env:
@@ -70,7 +73,7 @@ spec:
               cpu: 10m
               memory: 20Mi
         - name: smb
-          image: mcr.microsoft.com/k8s/csi/smb-csi:v0.6.0
+          image: mcr.microsoft.com/k8s/csi/smb-csi:v1.0.0
           imagePullPolicy: IfNotPresent
           args:
             - --v=5
@@ -100,17 +103,15 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: spec.nodeName
-          securityContext:
-          #  privileged: true  # TKGI-CHANGE
           volumeMounts:
             - name: kubelet-dir
               mountPath: "C:\\var\\lib\\kubelet"
             - name: plugin-dir
               mountPath: C:\csi
             - name: csi-proxy-fs-pipe
-              mountPath: \\.\pipe\csi-proxy-filesystem-v1alpha1
+              mountPath: \\.\pipe\csi-proxy-filesystem-v1beta1
             - name: csi-proxy-smb-pipe
-              mountPath: \\.\pipe\csi-proxy-smb-v1alpha1
+              mountPath: \\.\pipe\csi-proxy-smb-v1beta1
           resources:
             limits:
               cpu: 400m
@@ -121,11 +122,11 @@ spec:
       volumes:
         - name: csi-proxy-fs-pipe
           hostPath:
-            path: \\.\pipe\csi-proxy-filesystem-v1alpha1
+            path: \\.\pipe\csi-proxy-filesystem-v1beta1
             type: ""
         - name: csi-proxy-smb-pipe
           hostPath:
-            path: \\.\pipe\csi-proxy-smb-v1alpha1
+            path: \\.\pipe\csi-proxy-smb-v1beta1
             type: ""
         - name: registration-dir
           hostPath:

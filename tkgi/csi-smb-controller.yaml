@@ -1,3 +1,4 @@
+
 ---
 kind: Deployment
 apiVersion: apps/v1
@@ -14,6 +15,7 @@ spec:
       labels:
         app: csi-smb-controller
     spec:
+      dnsPolicy: ClusterFirstWithHostNet
       serviceAccountName: csi-smb-controller-sa
       nodeSelector:
         kubernetes.io/os: linux
@@ -23,11 +25,15 @@ spec:
           operator: "Equal"
           value: "true"
           effect: "NoSchedule"
+        - key: "node-role.kubernetes.io/controlplane"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
       containers:
         - name: csi-provisioner
-          image: k8s.gcr.io/sig-storage/csi-provisioner:v2.0.4
+          image: k8s.gcr.io/sig-storage/csi-provisioner:v2.1.0
           args:
-            - "-v=5"
+            - "-v=2"
             - "--csi-address=$(ADDRESS)"
             - "--leader-election"
           env:
@@ -39,17 +45,17 @@ spec:
           resources:
             limits:
               cpu: 100m
-              memory: 100Mi
+              memory: 300Mi
             requests:
               cpu: 10m
               memory: 20Mi
         - name: liveness-probe
-          image: k8s.gcr.io/sig-storage/livenessprobe:v2.1.0
+          image: k8s.gcr.io/sig-storage/livenessprobe:v2.3.0
           args:
             - --csi-address=/csi/csi.sock
             - --probe-timeout=3s
             - --health-port=29642
-            - --v=5
+            - --v=2
           volumeMounts:
             - name: socket-dir
               mountPath: /csi
@@ -61,7 +67,7 @@ spec:
               cpu: 10m
               memory: 20Mi
         - name: smb
-          image: mcr.microsoft.com/k8s/csi/smb-csi:v0.6.0
+          image: mcr.microsoft.com/k8s/csi/smb-csi:v1.0.0
           imagePullPolicy: IfNotPresent
           args:
             - "--v=5"
@@ -85,6 +91,8 @@ spec:
           env:
             - name: CSI_ENDPOINT
               value: unix:///csi/csi.sock
+          securityContext:
+            privileged: true
           volumeMounts:
             - mountPath: /csi
               name: socket-dir

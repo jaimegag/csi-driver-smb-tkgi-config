@@ -22,5 +22,4 @@ kubectl apply -f csi-smb-controller.yaml
 kubectl apply -f csi-smb-node-windows.yaml
 ```
 
-The [Upstream](https://github.com/kubernetes-csi/csi-driver-smb/blob/master/docs/install-csi-driver-v0.6.0.md) configuration used (v0.6.0) can be found in [upstream](/upstream) folder.
-
+The [Upstream](https://github.com/kubernetes-csi/csi-driver-smb/tree/cut-v1.0.0/deploy/v1.0.0) configuration used (v1.0.0) can be found in [upstream](/upstream) folder.
