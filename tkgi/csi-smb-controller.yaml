@@ -92,7 +92,7 @@ spec:
             - name: CSI_ENDPOINT
               value: unix:///csi/csi.sock
           securityContext:
-            privileged: true
+            privileged: true   # TKGI Note: Make sure your Windows cluster's kube-apiserver has `--allow-privileged=true`, by default or via k8s profile
           volumeMounts:
             - mountPath: /csi
               name: socket-dir

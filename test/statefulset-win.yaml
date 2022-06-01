@@ -1,0 +1,43 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: busybox-smb
+  labels:
+    app: busybox
+spec:
+  serviceName: busybox-smb
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: busybox
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": windows
+      containers:
+        - name: busybox-smb
+          image: e2eteam/busybox:1.29
+          command:
+            - "powershell.exe"
+            - "-Command"
+            - "while (1) { Add-Content -Encoding Ascii C:\\mnt\\smb\\data.txt $(Get-Date -Format u); sleep 1 }"
+          volumeMounts:
+            - name: persistent-storage
+              mountPath: /mnt/smb
+              subPath: subPath
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: busybox
+  volumeClaimTemplates:
+    - metadata:
+        name: persistent-storage
+        annotations:
+          volume.beta.kubernetes.io/storage-class: smb
+      spec:
+        accessModes: ["ReadWriteMany"]
+        resources:
+          requests:
+            storage: 100Gi
