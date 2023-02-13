@@ -6,7 +6,19 @@ CSI drivers are recommended to be deployed as containers. Node plugin containers
 
 Follow steps [here](./BuildCSIProxy.md) to build the `csi-proxy.exe` binary.
 
-After you build the binary you need to place it in every Windows worker node. The easiest way to do this is to install it in the base Windows Server 2019 image and build your stemcell with it. Also make sure you start it as a web service that starts when the machine boots.
+## Install CSI Proxy
+
+After you build the binary you need to place it in every Windows worker node. The easiest way to do this in TKGI is to install it in the base Windows Server 2019 image and build your stemcell with it. Add the binary during the stemcell building process, while the VM is powered on before powering it off (before step 8 [here](https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid-Integrated-Edition/1.15/tkgi/GUID-create-vsphere-stemcell.html#remove-hidden-devices-5))
+
+Make sure you start it as a web service that starts when the machine boots. Here's the [upstream documentation](https://github.com/kubernetes-csi/csi-proxy#installation). This is a sample of working steps:
+```
+# Install the csi-proxy.exe binary in this location: “C:\csi\csi-proxy.exe”
+# Then we run these commands
+$flags = "-windows-service -log_file=C:\csi\logs\csi-proxy.log -logtostderr=false"
+sc.exe create csiproxy start= "auto" binPath= "C:\csi\csi-proxy.exe $flags"
+sc.exe failure csiproxy reset= 0 actions= restart/10000
+sc.exe start csiproxy
+```
 
 ## Build CSI Driver
 This step should be optional and only needed if certain customization is required in the CSI Driver images.
